@@ -21,6 +21,7 @@
     </properties>
     <modules>
         <module>api-gateway</module>
+        <module>auth-service</module>
         <module>eureka-server</module>
         <module>service-a</module>
         <module>service-b</module>
