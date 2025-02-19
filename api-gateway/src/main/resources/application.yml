@@ -1,0 +1,19 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: service-a
+          uri: lb://SERVICE-A
+          predicates:
+            - Path=/helloWorld
+        #         filters:
+        #           - AuthenticationFilter
+
+        - id: service-b
+          uri: lb://SERVICE-B
+          predicates:
+            - Path=/helloEureka
