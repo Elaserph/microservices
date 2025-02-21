@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -19,23 +20,40 @@ public class JwtService {
     private static final long REFRESH_TOKEN_VALIDITY = TimeUnit.DAYS.toMillis(7);
     private final Map<String, String> refreshTokenMap = new HashMap<>();
 
-    public JwtService(MyUserRepository userRepository){
+    public JwtService(MyUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public String createAccessToken(MyUser user){
+    public String createAccessToken(MyUser user) {
         return JwtUtil.generateJwtToken(user, ACCESS_TOKEN_VALIDITY);
     }
 
-    public void createRefreshToken(MyUser user){
+    public void createRefreshToken(MyUser user) {
         var refreshToken = JwtUtil.generateJwtToken(user, REFRESH_TOKEN_VALIDITY);
         refreshTokenMap.put(user.getUsername(), refreshToken);
     }
 
-    public Boolean validateToken(String token){
-        String extractedUsername = JwtUtil.extractUsername(token);
-        var user = userRepository.getByUsername(extractedUsername);
-
+    public Boolean validateToken(String token) {
+        var user = getMyUser(token);
         return (user.isPresent() && !JwtUtil.isTokenExpired(token));
     }
+
+    public String refreshToken(String token) {
+        var user = getMyUser(token);
+        if (user.isPresent() && refreshTokenMap.containsKey(user.get().getUsername())) {
+            var refreshToken = refreshTokenMap.get(user.get().getUsername());
+            Boolean isExpired = JwtUtil.isTokenExpired(refreshToken);
+            if(Boolean.FALSE.equals(isExpired)){
+                return JwtUtil.generateJwtToken(user.get(), ACCESS_TOKEN_VALIDITY);
+            } else
+                return "Please Login Again!";
+        } else
+            return "Invalid token";
+    }
+
+    private Optional<MyUser> getMyUser(String token) {
+        String extractedUsername = JwtUtil.extractUsername(token);
+        return userRepository.getByUsername(extractedUsername);
+    }
+
 }

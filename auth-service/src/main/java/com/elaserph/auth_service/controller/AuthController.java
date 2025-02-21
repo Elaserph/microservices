@@ -52,4 +52,9 @@ public class AuthController {
     public ResponseEntity<Boolean> validateToken(@RequestParam("token") String token) {
         return new ResponseEntity<>(jwtService.validateToken(token), HttpStatus.OK);
     }
+
+    @GetMapping("/refresh")
+    public ResponseEntity<String> refreshAccessToken(@RequestParam("token") String token) {
+        return new ResponseEntity<>(jwtService.refreshToken(token), HttpStatus.OK);
+    }
 }
