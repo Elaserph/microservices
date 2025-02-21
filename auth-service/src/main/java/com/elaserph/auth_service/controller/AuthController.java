@@ -28,14 +28,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@RequestBody MyUser user) {
+    public ResponseEntity<String> registerUser(@RequestBody MyUser user) {
         var savedUser = myUserService.saveMyUser(user);
         jwtService.createRefreshToken(savedUser);
-        return jwtService.createAccessToken(savedUser);
+        return new ResponseEntity<>(jwtService.createAccessToken(user), HttpStatus.OK);
     }
 
     @GetMapping("/authenticate")
-    public ResponseEntity<String> authenticate(@RequestBody MyUser user) {
+    public ResponseEntity<String> authenticateUser(@RequestBody MyUser user) {
         try {
             Authentication authentication = myUserService.authenticateUser(user);
             if (authentication.isAuthenticated()) {
@@ -46,5 +46,10 @@ public class AuthController {
         } catch (AuthenticationException e) {
             return new ResponseEntity<>("Authentication failed for user: " + user.getUsername(), HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @GetMapping("/validate")
+    public ResponseEntity<Boolean> validateToken(@RequestParam("token") String token) {
+        return new ResponseEntity<>(jwtService.validateToken(token), HttpStatus.OK);
     }
 }

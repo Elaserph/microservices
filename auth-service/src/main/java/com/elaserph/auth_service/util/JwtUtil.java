@@ -1,10 +1,11 @@
 package com.elaserph.auth_service.util;
 
 import com.elaserph.auth_service.entity.MyUser;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
@@ -26,9 +27,29 @@ public final class JwtUtil {
                 .compact();
     }
 
-    private static Key generateKey() {
+    private static SecretKey generateKey() {
         byte[] decodedKey = Base64.getDecoder().decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(decodedKey);
+    }
+
+    public static String extractUsername(String token) {
+        return extractClaims(token).getSubject();
+    }
+
+    public static Date extractExpiration(String token) {
+        return extractClaims(token).getExpiration();
+    }
+
+    public static Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(Date.from(Instant.now()));
+    }
+
+    public static Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(generateKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
 }
