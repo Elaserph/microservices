@@ -3,7 +3,9 @@ package com.elaserph.auth_service.configuration;
 import com.elaserph.auth_service.service.MyUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,7 +32,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/auth/register", "/auth/refresh",
-                        "/auth/token", "/auth/validate", "/h2-console/**").permitAll();
+                        "/auth/authenticate", "/auth/validate", "/h2-console/**").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .headers(configurer -> configurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))  //h2 UI uses frames
@@ -43,6 +45,11 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService());
@@ -51,7 +58,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+    public AuthenticationManager authenticationManager() {
+        return new ProviderManager(authenticationProvider());
     }
 }
