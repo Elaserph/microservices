@@ -2,6 +2,7 @@ package com.elaserph.auth_service.controller;
 
 import com.elaserph.auth_service.entity.MyUser;
 import com.elaserph.auth_service.repository.MyUserRepository;
+import com.elaserph.auth_service.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,8 +21,9 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public MyUser createUser(@RequestBody MyUser user){
+    public String createUser(@RequestBody MyUser user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        MyUser savedUser = userRepository.save(user);
+        return JwtUtil.generateJwtToken(savedUser);
     }
 }
