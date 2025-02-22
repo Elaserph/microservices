@@ -10,10 +10,17 @@ spring:
           uri: lb://SERVICE-A
           predicates:
             - Path=/helloWorld
-        #         filters:
-        #           - AuthenticationFilter
+          filters:
+            - AuthFilter
 
         - id: service-b
           uri: lb://SERVICE-B
           predicates:
             - Path=/helloEureka
+          filters:
+            - AuthFilter
+
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
