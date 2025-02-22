@@ -3,8 +3,6 @@ package com.elaserph.auth_service.service;
 import com.elaserph.auth_service.entity.MyUser;
 import com.elaserph.auth_service.repository.MyUserRepository;
 import com.elaserph.auth_service.util.JwtUtil;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

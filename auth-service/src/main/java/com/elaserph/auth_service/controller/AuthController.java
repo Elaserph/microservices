@@ -29,9 +29,12 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody MyUser user) {
-        var savedUser = myUserService.saveMyUser(user);
-        jwtService.createRefreshToken(savedUser);
-        return new ResponseEntity<>(jwtService.createAccessToken(user), HttpStatus.OK);
+        if(myUserService.getByUser(user).isEmpty()) {
+            var savedUser = myUserService.saveMyUser(user);
+            jwtService.createRefreshToken(savedUser);
+            return new ResponseEntity<>(jwtService.createAccessToken(user), HttpStatus.OK);
+        } else
+            return new ResponseEntity<>("User is already registered", HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/authenticate")

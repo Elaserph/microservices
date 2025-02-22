@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class MyUserService {
 
@@ -32,5 +34,9 @@ public class MyUserService {
                 .authenticate(new UsernamePasswordAuthenticationToken(
                         user.getUsername(), user.getPassword()
                 ));
+    }
+
+    public Optional<MyUser> getByUser(MyUser user) {
+        return userRepository.getByUsername(user.getUsername());
     }
 }
