@@ -17,3 +17,10 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: <CLIENT-ID>
+            client-secret: <CLIENT-SECRET>

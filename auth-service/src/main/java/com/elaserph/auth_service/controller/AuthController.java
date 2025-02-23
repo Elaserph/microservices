@@ -13,6 +13,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -67,5 +69,10 @@ public class AuthController {
     public ResponseEntity<String> refreshAccessToken(@RequestParam("token") String token) {
         log.info("Token refresh api");
         return new ResponseEntity<>(jwtService.refreshToken(token), HttpStatus.OK);
+    }
+
+    @RequestMapping("/user")
+    public Principal user(Principal user){
+        return user;
     }
 }

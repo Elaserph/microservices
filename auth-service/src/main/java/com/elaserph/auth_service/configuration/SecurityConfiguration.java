@@ -32,9 +32,14 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/auth/register", "/auth/refresh",
-                        "/auth/authenticate", "/auth/validate", "/h2-console/**").permitAll();
+                        "/auth/authenticate", "/auth/validate", "/h2-console/**", "login/oauth2/code/google"
+                    ).permitAll();
                     registry.anyRequest().authenticated();
                 })
+                .oauth2Login(httpSecurityOAuth2LoginConfigurer ->
+                        httpSecurityOAuth2LoginConfigurer.successHandler(
+                                (request, response, authentication) -> response.sendRedirect("/auth/user")
+                        ))
                 .headers(configurer -> configurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))  //h2 UI uses frames
                 .build();
     }
