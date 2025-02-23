@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class JwtService {
 
     private final MyUserRepository userRepository;
-    private static final long ACCESS_TOKEN_VALIDITY = TimeUnit.MINUTES.toMillis(30);
+    private static final long ACCESS_TOKEN_VALIDITY = TimeUnit.MINUTES.toMillis(1);
     private static final long REFRESH_TOKEN_VALIDITY = TimeUnit.DAYS.toMillis(7);
     private final Map<String, String> refreshTokenMap = new HashMap<>();
 
@@ -40,8 +40,8 @@ public class JwtService {
         var user = getMyUser(token);
         if (user.isPresent() && refreshTokenMap.containsKey(user.get().getUsername())) {
             var refreshToken = refreshTokenMap.get(user.get().getUsername());
-            Boolean isExpired = JwtUtil.isTokenExpired(refreshToken);
-            if(Boolean.FALSE.equals(isExpired)){
+            Boolean isRefreshTokenExpired = JwtUtil.isTokenExpired(refreshToken);
+            if(Boolean.FALSE.equals(isRefreshTokenExpired)){
                 return JwtUtil.generateJwtToken(user.get(), ACCESS_TOKEN_VALIDITY);
             } else
                 return "Please Login Again!";

@@ -36,13 +36,13 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                     authHeader = authHeader.substring(7);
 
             if(routeValidator.isNotTokenEndpoint.test(exchange.getRequest())){
-                Mono<Boolean> validToken= webClient
-                        .get()
-                        .uri("lb://AUTH-SERVICE/auth/validate?token=" + authHeader)
-                        .retrieve()
-                        .bodyToMono(Boolean.class);
+                Mono<Boolean> validTokenMono =
+                        webClient.get()
+                            .uri("lb://AUTH-SERVICE/auth/validate?token=" + authHeader)
+                            .retrieve()
+                            .bodyToMono(Boolean.class);
 
-                return validToken.flatMap(valid -> {
+                return validTokenMono.flatMap(valid -> {
                             if (Boolean.TRUE.equals(valid)) {
                                 return chain.filter(exchange);
                             } else {

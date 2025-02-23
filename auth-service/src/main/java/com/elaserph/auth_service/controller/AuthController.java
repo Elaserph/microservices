@@ -4,6 +4,8 @@ import com.elaserph.auth_service.entity.MyUser;
 import com.elaserph.auth_service.service.JwtService;
 import com.elaserph.auth_service.service.MyUserDetailsService;
 import com.elaserph.auth_service.service.MyUserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final MyUserDetailsService myUserDetailsService;
     private final MyUserService myUserService;
@@ -29,7 +33,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody MyUser user) {
-        System.out.println("in register api");
+        log.info("Register api");
         if(myUserService.getByUser(user).isEmpty()) {
             var savedUser = myUserService.saveMyUser(user);
             jwtService.createRefreshToken(savedUser);
@@ -40,7 +44,7 @@ public class AuthController {
 
     @GetMapping("/authenticate")
     public ResponseEntity<String> authenticateUser(@RequestBody MyUser user) {
-        System.out.println("in authentication api");
+        log.info("Authentication api");
         try {
             Authentication authentication = myUserService.authenticateUser(user);
             if (authentication.isAuthenticated()) {
@@ -55,15 +59,13 @@ public class AuthController {
 
     @GetMapping("/validate")
     public ResponseEntity<Boolean> validateToken(@RequestParam("token") String token) {
-        Boolean valid = jwtService.validateToken(token);
-        System.out.println("in token validation api, validity: "+valid);
-        return new ResponseEntity<>(valid, HttpStatus.OK);
+        log.info("Token validation api");
+        return new ResponseEntity<>(jwtService.validateToken(token), HttpStatus.OK);
     }
 
     @GetMapping("/refresh")
     public ResponseEntity<String> refreshAccessToken(@RequestParam("token") String token) {
-        String refreshToken = jwtService.refreshToken(token);
-        System.out.println("in token refresh api, refreshed: "+refreshToken);
-        return new ResponseEntity<>(jwtService.refreshToken(refreshToken), HttpStatus.OK);
+        log.info("Token refresh api");
+        return new ResponseEntity<>(jwtService.refreshToken(token), HttpStatus.OK);
     }
 }
