@@ -29,6 +29,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody MyUser user) {
+        System.out.println("in register api");
         if(myUserService.getByUser(user).isEmpty()) {
             var savedUser = myUserService.saveMyUser(user);
             jwtService.createRefreshToken(savedUser);
@@ -39,6 +40,7 @@ public class AuthController {
 
     @GetMapping("/authenticate")
     public ResponseEntity<String> authenticateUser(@RequestBody MyUser user) {
+        System.out.println("in authentication api");
         try {
             Authentication authentication = myUserService.authenticateUser(user);
             if (authentication.isAuthenticated()) {
@@ -53,11 +55,15 @@ public class AuthController {
 
     @GetMapping("/validate")
     public ResponseEntity<Boolean> validateToken(@RequestParam("token") String token) {
-        return new ResponseEntity<>(jwtService.validateToken(token), HttpStatus.OK);
+        Boolean valid = jwtService.validateToken(token);
+        System.out.println("in token validation api, validity: "+valid);
+        return new ResponseEntity<>(valid, HttpStatus.OK);
     }
 
     @GetMapping("/refresh")
     public ResponseEntity<String> refreshAccessToken(@RequestParam("token") String token) {
-        return new ResponseEntity<>(jwtService.refreshToken(token), HttpStatus.OK);
+        String refreshToken = jwtService.refreshToken(token);
+        System.out.println("in token refresh api, refreshed: "+refreshToken);
+        return new ResponseEntity<>(jwtService.refreshToken(refreshToken), HttpStatus.OK);
     }
 }

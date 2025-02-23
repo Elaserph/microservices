@@ -14,17 +14,17 @@ public class RouteValidator {
             //"/auth/refresh", "/auth/validate"
     );
 
-    public static final List<String> refreshTokenEndpoint = List.of(
-            "/auth/refresh"
+    public static final List<String> tokenEndpoint = List.of(
+            "/auth/refresh", "/auth/validate"
     );
 
-    public Predicate<ServerHttpRequest> isSecured =
+    public Predicate<ServerHttpRequest> isSecuredEndpoint =
             request -> openApiEndpoints
                     .stream()
                     .noneMatch(uri -> request.getURI().getPath().contains(uri));
 
-    public Predicate<ServerHttpRequest> isNotRefresh =
-            request -> refreshTokenEndpoint
+    public Predicate<ServerHttpRequest> isNotTokenEndpoint =
+            request -> tokenEndpoint
                     .stream()
                     .noneMatch(uri -> request.getURI().getPath().contains(uri));
 
