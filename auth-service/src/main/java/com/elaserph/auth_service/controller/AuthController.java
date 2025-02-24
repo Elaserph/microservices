@@ -72,6 +72,12 @@ public class AuthController {
         return new ResponseEntity<>(jwtService.refreshToken(token), HttpStatus.OK);
     }
 
+    @GetMapping("/payload")
+    public ResponseEntity<String> getJwtPayload(@RequestParam("token") String token) {
+        log.info("JWT Payload api");
+        return new ResponseEntity<>(jwtService.getMyUser(token).get().getUsername(), HttpStatus.OK);
+    }
+
     @RequestMapping("/sso/google")
     public ResponseEntity<String> user(AbstractAuthenticationToken user) {
         //TODO: Need custom Google auth object to handle its token

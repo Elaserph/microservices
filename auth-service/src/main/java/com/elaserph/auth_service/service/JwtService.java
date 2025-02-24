@@ -49,7 +49,7 @@ public class JwtService {
             return "Invalid token";
     }
 
-    private Optional<MyUser> getMyUser(String token) {
+    public Optional<MyUser> getMyUser(String token) {
         String extractedUsername = JwtUtil.extractUsername(token);
         return userRepository.getByUsername(extractedUsername);
     }

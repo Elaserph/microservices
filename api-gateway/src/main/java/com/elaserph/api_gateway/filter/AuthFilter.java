@@ -1,10 +1,10 @@
 package com.elaserph.api_gateway.filter;
 
-import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
@@ -16,8 +16,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
     private final RouteValidator routeValidator;
     private final WebClient webClient;
 
-    public AuthFilter(RouteValidator routeValidator, DiscoveryClient discoveryClient,
-                      WebClient.Builder webClientBuilder) {
+    public AuthFilter(RouteValidator routeValidator, WebClient.Builder webClientBuilder) {
         super(Config.class);
         this.webClient = webClientBuilder.build();
         this.routeValidator = routeValidator;
@@ -42,9 +41,18 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                             .retrieve()
                             .bodyToMono(Boolean.class);
 
+                String finalAuthHeader = authHeader;
                 return validTokenMono.flatMap(valid -> {
                             if (Boolean.TRUE.equals(valid)) {
-                                return chain.filter(exchange);
+                                Mono<String> userMono = webClient.get()
+                                        .uri("lb://AUTH-SERVICE/auth/payload?token=" + finalAuthHeader)
+                                        .retrieve()
+                                        .bodyToMono(String.class);
+                                return userMono.flatMap(value -> {
+                                    System.out.println("request User is: "+value);
+                                    ServerHttpRequest exchangeRequest = exchange.getRequest().mutate().header("user", value).build();
+                                    return chain.filter(exchange.mutate().request(exchangeRequest).build());
+                                });
                             } else {
                                 return onError(exchange, "Invalid Token!", HttpStatus.UNAUTHORIZED);
                             }

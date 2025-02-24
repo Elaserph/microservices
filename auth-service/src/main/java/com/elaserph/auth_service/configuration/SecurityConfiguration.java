@@ -32,7 +32,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/auth/register", "/auth/refresh", "/login/oauth2/authorization/google",
-                        "/auth/authenticate", "/auth/validate", "/h2-console/**", "/login/oauth2/code/google"
+                        "/auth/authenticate", "/auth/validate", "/auth/payload", "/h2-console/**", "/login/oauth2/code/google"
                     ).permitAll();
                     registry.anyRequest().authenticated();
                 })
