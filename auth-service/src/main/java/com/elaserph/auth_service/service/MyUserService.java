@@ -29,8 +29,8 @@ public class MyUserService {
         return userRepository.save(user);
     }
 
-    public MyUser saveSSOMyUser(MyUser user){
-        return userRepository.save(user);
+    public void saveSSOMyUser(MyUser user){
+        userRepository.save(user);
     }
 
     public Authentication authenticateUser(MyUser user) {

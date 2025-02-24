@@ -14,6 +14,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -35,7 +37,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody MyUser user) {
         log.info("Register api");
-        if(myUserService.getByUser(user).isEmpty()) {
+        if (myUserService.getByUser(user).isEmpty()) {
             var savedUser = myUserService.saveMyUser(user);
             jwtService.createRefreshToken(savedUser);
             return new ResponseEntity<>(jwtService.createAccessToken(user), HttpStatus.OK);
@@ -71,21 +73,30 @@ public class AuthController {
     }
 
     @RequestMapping("/sso/google")
-    public ResponseEntity<String> user(AbstractAuthenticationToken user){
+    public ResponseEntity<String> user(AbstractAuthenticationToken user) {
         //TODO: Need custom Google auth object to handle its token
-        log.info("Name: {}",user.getName());
-        log.info("Details: {}",user.getDetails().toString());
-        log.info("Authorities: {}",user.getAuthorities().toString());
-        log.info("Principal: {}",user.getPrincipal().toString());
-        log.info("Credentials: {}",user.getCredentials().toString());
-        log.info("Other details: {}", user);
+        log.info("Name: {}", user.getName());
+        log.info("Details: {}", user.getDetails().toString());
+        log.info("Authorities: {}", user.getAuthorities().toString());
+        log.info("Principal: {}", user.getPrincipal().toString());
+        log.info("Credentials: {}", user.getCredentials().toString());
+        log.info("All details: {}", user);
 
-        if(user.isAuthenticated()) {
+        String userEmail = Arrays.stream(user.getPrincipal().toString().split(","))
+                .filter(s -> s.contains("email=")).toList().get(0)
+                .split("=")[1]
+                .replace("}", "")
+                .replace("]", "");
+        log.info("UserEmail: {}", userEmail);
+
+        if (user.isAuthenticated()) {
             MyUser ssoUser = new MyUser();
-            ssoUser.setUsername(user.getName());
+            ssoUser.setUsername(userEmail);
 
-            if(myUserService.getByUser(ssoUser).isEmpty())
+            if (myUserService.getByUser(ssoUser).isEmpty()) { //1st time SSO user
+                ssoUser.setRole("user");
                 myUserService.saveSSOMyUser(ssoUser);
+            }
             jwtService.createRefreshToken(ssoUser);
             return new ResponseEntity<>(jwtService.createAccessToken(ssoUser), HttpStatus.OK);
         } else
