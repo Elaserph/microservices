@@ -25,40 +25,41 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
     @Override
     public GatewayFilter apply(AuthFilter.Config config) {
         return ((exchange, chain) -> {
-            if(routeValidator.isSecuredEndpoint.test(exchange.getRequest()) &&
-                    !exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)){
-                    throw new RuntimeException("Missing Authorization Header");
-            }
+            if (routeValidator.isJwtSecuredEndpoint.test(exchange.getRequest())) {
 
-            String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
-            if (authHeader != null && authHeader.startsWith("Bearer "))
+                if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION))
+                    throw new RuntimeException("Missing Authorization Header");
+
+                String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
+                if (authHeader != null && authHeader.startsWith("Bearer "))
                     authHeader = authHeader.substring(7);
 
-            if(routeValidator.isNotTokenEndpoint.test(exchange.getRequest())){
+
                 Mono<Boolean> validTokenMono =
                         webClient.get()
-                            .uri("lb://AUTH-SERVICE/auth/validate?token=" + authHeader)
-                            .retrieve()
-                            .bodyToMono(Boolean.class);
+                                .uri("lb://AUTH-SERVICE/auth/validate?token=" + authHeader)
+                                .retrieve()
+                                .bodyToMono(Boolean.class);
 
                 String finalAuthHeader = authHeader;
                 return validTokenMono.flatMap(valid -> {
-                            if (Boolean.TRUE.equals(valid)) {
-                                Mono<String> userMono = webClient.get()
-                                        .uri("lb://AUTH-SERVICE/auth/payload?token=" + finalAuthHeader)
-                                        .retrieve()
-                                        .bodyToMono(String.class);
-                                return userMono.flatMap(value -> {
-                                    System.out.println("request User is: "+value);
-                                    ServerHttpRequest exchangeRequest = exchange.getRequest().mutate().header("user", value).build();
-                                    return chain.filter(exchange.mutate().request(exchangeRequest).build());
-                                });
-                            } else {
-                                return onError(exchange, "Invalid Token!", HttpStatus.UNAUTHORIZED);
-                            }
-                        })
-                        .onErrorResume(e -> onError(exchange, "Token validation error: " + e.getMessage(), HttpStatus.UNAUTHORIZED));
+                    if (Boolean.TRUE.equals(valid)) {
+                        Mono<String> userMono = webClient.get()
+                                .uri("lb://AUTH-SERVICE/auth/payload?token=" + finalAuthHeader)
+                                .retrieve()
+                                .bodyToMono(String.class);
+                        return userMono.flatMap(value -> {
+                            ServerHttpRequest exchangeRequest = exchange.getRequest().mutate().header("user", value).build();
+                            return chain.filter(exchange.mutate().request(exchangeRequest).build());
+                        });
+                    } else {
+                        return onError(exchange, "Invalid Token!", HttpStatus.UNAUTHORIZED);
+                    }
+                }).onErrorResume(e -> onError(exchange, "Token validation error: " + e.getMessage(), HttpStatus.UNAUTHORIZED));
             }
+            if (routeValidator.isPrivateAuthEndpoint.test(exchange.getRequest()))
+                throw new RuntimeException("Cannot access private auth endpoints");
+
             return chain.filter(exchange);
         });
     }

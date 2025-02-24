@@ -9,23 +9,22 @@ import java.util.function.Predicate;
 @Component
 public class RouteValidator {
 
-    public static final List<String> openApiEndpoints = List.of(
-            "/auth/register", "/auth/authenticate", "/eureka"
-            //"/auth/refresh", "/auth/validate"
+    public static final List<String> nonJwtSecuredEndpoints = List.of(
+            "/auth/register", "/auth/authenticate", "/auth/refresh",
+            "/auth/validate", "/auth/payload", "/h2-console/**", "/eureka",
+            "/login/oauth2/authorization/google", "/login/oauth2/code/google"
     );
 
-    public static final List<String> tokenEndpoint = List.of(
-            "/auth/refresh", "/auth/validate"
+    public static final List<String> privateAuthEndpoints = List.of(
+            "/auth/refresh", "/auth/validate", "/auth/payload", "/h2-console/**"
     );
 
-    public Predicate<ServerHttpRequest> isSecuredEndpoint =
-            request -> openApiEndpoints
-                    .stream()
+    public Predicate<ServerHttpRequest> isJwtSecuredEndpoint =
+            request -> nonJwtSecuredEndpoints.stream()
                     .noneMatch(uri -> request.getURI().getPath().contains(uri));
 
-    public Predicate<ServerHttpRequest> isNotTokenEndpoint =
-            request -> tokenEndpoint
-                    .stream()
-                    .noneMatch(uri -> request.getURI().getPath().contains(uri));
+    public Predicate<ServerHttpRequest> isPrivateAuthEndpoint =
+            request -> privateAuthEndpoints.stream()
+                    .anyMatch(uri -> request.getURI().getPath().contains(uri));
 
 }
