@@ -8,12 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 
 @RestController
 @RequestMapping("/auth")
@@ -71,8 +70,25 @@ public class AuthController {
         return new ResponseEntity<>(jwtService.refreshToken(token), HttpStatus.OK);
     }
 
-    @RequestMapping("/user")
-    public Principal user(Principal user){
-        return user;
+    @RequestMapping("/sso/google")
+    public ResponseEntity<String> user(AbstractAuthenticationToken user){
+        //TODO: Need custom Google auth object to handle its token
+        log.info("Name: {}",user.getName());
+        log.info("Details: {}",user.getDetails().toString());
+        log.info("Authorities: {}",user.getAuthorities().toString());
+        log.info("Principal: {}",user.getPrincipal().toString());
+        log.info("Credentials: {}",user.getCredentials().toString());
+        log.info("Other details: {}", user);
+
+        if(user.isAuthenticated()) {
+            MyUser ssoUser = new MyUser();
+            ssoUser.setUsername(user.getName());
+
+            if(myUserService.getByUser(ssoUser).isEmpty())
+                myUserService.saveSSOMyUser(ssoUser);
+            jwtService.createRefreshToken(ssoUser);
+            return new ResponseEntity<>(jwtService.createAccessToken(ssoUser), HttpStatus.OK);
+        } else
+            return new ResponseEntity<>("Authentication failed for user: " + user.getName(), HttpStatus.UNAUTHORIZED);
     }
 }
