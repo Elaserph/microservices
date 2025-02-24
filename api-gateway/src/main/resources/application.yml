@@ -1,5 +1,10 @@
 server:
   port: 8080
+
+eureka:
+  instance:
+    hostname: localhost
+
 spring:
   application:
     name: api-gateway
@@ -23,6 +28,6 @@ spring:
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
-            - Path=/auth/**,/login/**
+            - Path=/auth/**,/oauth2/**
 #          filters:
 #            - AuthFilter

@@ -12,7 +12,7 @@ public class RouteValidator {
     public static final List<String> nonJwtSecuredEndpoints = List.of(
             "/auth/register", "/auth/authenticate", "/auth/refresh",
             "/auth/validate", "/auth/payload", "/h2-console/**", "/eureka",
-            "/login/oauth2/authorization/google", "/login/oauth2/code/google"
+            "/oauth2/authorization/google", "/login/oauth2/code/google"
     );
 
     public static final List<String> privateAuthEndpoints = List.of(

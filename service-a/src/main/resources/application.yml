@@ -1,5 +1,10 @@
 spring:
   application:
     name: service-a
+
 server:
   port: 8081
+
+eureka:
+  instance:
+    hostname: localhost
