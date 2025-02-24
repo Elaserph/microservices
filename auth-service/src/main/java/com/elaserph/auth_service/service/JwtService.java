@@ -54,4 +54,12 @@ public class JwtService {
         return userRepository.getByUsername(extractedUsername);
     }
 
+    public String logout(String token) {
+        var user = getMyUser(token);
+        if (user.isPresent() && refreshTokenMap.containsKey(user.get().getUsername())) {
+            refreshTokenMap.remove(user.get().getUsername());
+            return "Logout Successful!!!";
+        }
+        return "User already logged out or not found!";
+    }
 }

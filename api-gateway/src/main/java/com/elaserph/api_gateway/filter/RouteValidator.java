@@ -10,13 +10,12 @@ import java.util.function.Predicate;
 public class RouteValidator {
 
     public static final List<String> nonJwtSecuredEndpoints = List.of(
-            "/auth/register", "/auth/authenticate", "/auth/refresh",
-            "/auth/validate", "/auth/payload", "/h2-console/**", "/eureka",
-            "/oauth2/authorization/google", "/login/oauth2/code/google"
+            "/auth/register", "/auth/authenticate", "/auth/logout", "/oauth2/authorization/google"  // public facing
+            , "/auth/validate", "/auth/refresh", "/auth/payload", "/h2-console/**", "/eureka" // private
     );
 
     public static final List<String> privateAuthEndpoints = List.of(
-            "/auth/refresh", "/auth/validate", "/auth/payload", "/h2-console/**"
+            "/auth/refresh", "/auth/validate", "/auth/payload", "/h2-console/**", "/eureka"
     );
 
     public Predicate<ServerHttpRequest> isJwtSecuredEndpoint =

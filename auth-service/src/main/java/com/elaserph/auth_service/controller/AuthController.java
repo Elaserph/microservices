@@ -79,7 +79,8 @@ public class AuthController {
     }
 
     @RequestMapping("/sso/google")
-    public ResponseEntity<String> user(AbstractAuthenticationToken user) {
+    public ResponseEntity<String> ssoGoogle(AbstractAuthenticationToken user) {
+        log.info("Google SSO api");
         //TODO: Need custom Google auth object to handle its token
         log.info("Name: {}", user.getName());
         log.info("Details: {}", user.getDetails().toString());
@@ -107,5 +108,11 @@ public class AuthController {
             return new ResponseEntity<>(jwtService.createAccessToken(ssoUser), HttpStatus.OK);
         } else
             return new ResponseEntity<>("Authentication failed for user: " + user.getName(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<String> logout(@RequestParam("token") String token) {
+        log.info("Logout api");
+        return new ResponseEntity<>(jwtService.logout(token), HttpStatus.OK);
     }
 }
