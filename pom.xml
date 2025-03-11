@@ -9,7 +9,7 @@
         <version>3.4.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>org.elaserph</groupId>
+    <groupId>com.elaserph</groupId>
     <artifactId>microservices</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
